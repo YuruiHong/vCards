@@ -2,13 +2,13 @@ FROM node as builder
 
 COPY . /app
 WORKDIR /app
-RUN yarn && yarn radicale
+RUN npm install && npm run radicale
 
 
-FROM alpine
+FROM alpine:edge
 
 RUN apk add --no-cache \
-    radicale \
+    radicale py3-six\
   && rm -rf /var/cache/apk/* \
   \
   && { \
@@ -32,6 +32,9 @@ RUN apk add --no-cache \
     echo '[server]'; \
     echo 'hosts = 0.0.0.0:5232, [::]:5232'; \
     echo; \
+    echo '[auth]'; \
+    echo 'type = none'; \
+    echo; \
     echo '[web]'; \
     echo 'type = none'; \
     echo; \
@@ -44,7 +47,8 @@ RUN apk add --no-cache \
     echo 'file = /etc/radicale/rights'; \
   } > /etc/radicale/config
 
-COPY --from=builder /app/radicale/ /app/vcards/collection-root/cn/
+COPY --from=builder /app/radicale/ios/ /app/vcards/collection-root/cn/
+COPY --from=builder /app/radicale/macos/ /app/vcards/collection-root/cnmacos/
 
 EXPOSE 5232
 
